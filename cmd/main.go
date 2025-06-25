@@ -2,24 +2,39 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/1shoukr/swiftplay-backend/internal/server"
 )
 
 func main() {
-	r := chi.NewRouter()
+	srv, err := server.NewServer()
+	if err != nil {
+		log.Fatal("Failed to create server:", err)
+	}
 
-	// Logger middleware
-	r.Use(middleware.Logger)
+	// Graceful shutdown
+	go func() {
+		fmt.Printf("Server starting on %s\n", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal("Server failed to start:", err)
+		}
+	}()
 
-	// Health route
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
+	// Wait for interrupt signal to gracefully shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
 
-	// Start server
-	fmt.Println("Server starting on :8080")
-	http.ListenAndServe(":8080", r)
+	fmt.Println("Shutting down server...")
+
+	// Close database connection
+	if err := srv.Close(); err != nil {
+		log.Printf("Error closing server: %v", err)
+	}
+
+	fmt.Println("Server stopped")
 }
