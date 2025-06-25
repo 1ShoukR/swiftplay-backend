@@ -1,16 +1,16 @@
 package database
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Database struct {
-	conn *pgx.Conn
+	conn *sqlx.DB
 }
 
 type Config struct {
@@ -40,12 +40,12 @@ func NewDatabase(config *Config) (*Database, error) {
 		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
 	)
 
-	conn, err := pgx.Connect(context.Background(), dsn)
+	conn, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	if err := conn.Ping(context.Background()); err != nil {
+	if err := conn.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
@@ -54,16 +54,16 @@ func NewDatabase(config *Config) (*Database, error) {
 	return &Database{conn: conn}, nil
 }
 
-//  closes the database connection
+// closes the database connection
 func (db *Database) Close() error {
 	if db.conn != nil {
-		return db.conn.Close(context.Background())
+		return db.conn.Close()
 	}
 	return nil
 }
 
-//  returns the underlying pgx connection
-func (db *Database) GetConn() *pgx.Conn {
+// GetDB returns the underlying sqlx.DB connection
+func (db *Database) GetDB() *sqlx.DB {
 	return db.conn
 }
 
