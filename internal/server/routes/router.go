@@ -14,7 +14,6 @@ func NewRouter(db *database.Database) http.Handler {
 	// Logger middleware
 	r.Use(middleware.Logger)
 
-	// Health route
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})

@@ -4,24 +4,16 @@ import (
 	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
+	"github.com/1shoukr/swiftplay-backend/internal/handlers"
 	"github.com/go-chi/chi/v5"
 )
 
 func NewAuthRouter(db *database.Database) http.Handler {
 	r := chi.NewRouter()
+	authHandler := handlers.NewAuthHandler(db)
 
-	// Auth routes will go here
-	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
-		// You can now use the database connection here
-		// Example: db.GetConn().Query(...)
-		w.Write([]byte("Login endpoint"))
-	})
-
-	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
-		// You can now use the database connection here
-		// Example: db.GetConn().Exec(...)
-		w.Write([]byte("Register endpoint"))
-	})
+	r.Get("/login", authHandler.Login)
+	r.Post("/create", authHandler.CreateUser)
 
 	return r
 }
