@@ -4,14 +4,15 @@ import (
 	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
+	"github.com/jmoiron/sqlx"
 )
 
 type AuthHandler struct {
-	db *database.Database
+	db *sqlx.DB
 }
 
 func NewAuthHandler(db *database.Database) *AuthHandler {
-	return &AuthHandler{db: db}
+	return &AuthHandler{db: db.GetDB()}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
