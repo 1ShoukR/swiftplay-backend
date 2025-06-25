@@ -13,7 +13,6 @@ type Database struct {
 	conn *pgx.Conn
 }
 
-// Config holds database configuration
 type Config struct {
 	Host     string
 	Port     string
@@ -23,7 +22,6 @@ type Config struct {
 	SSLMode  string
 }
 
-// LoadConfig loads database configuration from environment variables
 func LoadConfig() *Config {
 	return &Config{
 		Host:     getEnv("DB_HOST", "localhost"),
@@ -47,7 +45,6 @@ func NewDatabase(config *Config) (*Database, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Test the connection
 	if err := conn.Ping(context.Background()); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
@@ -57,7 +54,7 @@ func NewDatabase(config *Config) (*Database, error) {
 	return &Database{conn: conn}, nil
 }
 
-// Close closes the database connection
+//  closes the database connection
 func (db *Database) Close() error {
 	if db.conn != nil {
 		return db.conn.Close(context.Background())
@@ -65,12 +62,11 @@ func (db *Database) Close() error {
 	return nil
 }
 
-// GetConn returns the underlying pgx connection
+//  returns the underlying pgx connection
 func (db *Database) GetConn() *pgx.Conn {
 	return db.conn
 }
 
-// Helper function to get environment variables with default values
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
