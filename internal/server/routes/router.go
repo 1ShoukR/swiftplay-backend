@@ -22,5 +22,8 @@ func SetupRoutes(r *gin.Engine, db *database.Database) {
 	{
 		// Mount auth routes under /api/auth
 		SetupAuthRoutes(api, db)
+		
+		// Mount user routes under /api/users
+		SetupUserRoutes(api, db)
 	}
 }
