@@ -4,21 +4,21 @@ import (
 	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
-	"github.com/jmoiron/sqlx"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
-	db *sqlx.DB
+	db *gorm.DB
 }
 
 func NewAuthHandler(db *database.Database) *AuthHandler {
 	return &AuthHandler{db: db.GetDB()}
 }
 
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Login endpoint"))
-}
-
-func (h *AuthHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Create endpoint"))
+func (h *AuthHandler) Login(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login endpoint",
+		"status":  "success",
+	})
 }

@@ -5,12 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/1shoukr/swiftplay-backend/internal/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Database struct {
-	conn *sqlx.DB
+	conn *gorm.DB
 }
 
 type Config struct {
@@ -33,37 +34,54 @@ func LoadConfig() *Config {
 	}
 }
 
-// NewDatabase creates a new database connection
+// NewDatabase creates a new GORM database connection
 func NewDatabase(config *Config) (*Database, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
 	)
 
-	conn, err := sqlx.Connect("postgres", dsn)
+	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	if err := conn.Ping(); err != nil {
+	// Get underlying sql.DB to test connection
+	sqlDB, err := conn.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	}
+
+	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Println("Connected to PostgreSQL database successfully")
+	log.Println("Connected to PostgreSQL database successfully with GORM")
+
+	// Auto-migrate the schema
+	if err := conn.AutoMigrate(&models.User{}, &models.Profile{}, &models.Match{}, &models.Message{}); err != nil {
+		return nil, fmt.Errorf("failed to auto-migrate schema: %w", err)
+	}
+
+	log.Println("Database schema auto-migrated successfully")
 
 	return &Database{conn: conn}, nil
 }
 
-// closes the database connection
+// Close closes the database connection
 func (db *Database) Close() error {
 	if db.conn != nil {
-		return db.conn.Close()
+		sqlDB, err := db.conn.DB()
+		if err != nil {
+			return err
+		}
+		return sqlDB.Close()
 	}
 	return nil
 }
 
-// GetDB returns the underlying sqlx.DB connection
-func (db *Database) GetDB() *sqlx.DB {
+// GetDB returns the underlying gorm.DB connection
+func (db *Database) GetDB() *gorm.DB {
 	return db.conn
 }
 

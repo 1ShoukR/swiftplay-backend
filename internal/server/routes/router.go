@@ -4,22 +4,23 @@ import (
 	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(db *database.Database) http.Handler {
-	r := chi.NewRouter()
+func SetupRoutes(r *gin.Engine, db *database.Database) {
+	// Logger middleware (Gin has built-in logger)
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 
-	// Logger middleware
-	r.Use(middleware.Logger)
-
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+	// Health check endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "OK"})
 	})
 
-	// Mount auth routes under /api/auth
-	r.Mount("/api/auth", NewAuthRouter(db))
-
-	return r
+	// API route group
+	api := r.Group("/api")
+	{
+		// Mount auth routes under /api/auth
+		SetupAuthRoutes(api, db)
+	}
 }

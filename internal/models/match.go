@@ -5,9 +5,9 @@ import (
 )
 
 type Match struct {
-	MatchID   int       `json:"match_id" db:"match_id"`
-	UserID1   int       `json:"user_id_1" db:"user_id_1"`
-	UserID2   int       `json:"user_id_2" db:"user_id_2"`
-	Status    string    `json:"status" db:"status"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	MatchID   uint      `json:"match_id" gorm:"primaryKey;autoIncrement;column:match_id"`
+	UserID1   uint      `json:"user_id_1" gorm:"not null;index;column:user_id_1"`
+	UserID2   uint      `json:"user_id_2" gorm:"not null;index;column:user_id_2"`
+	Status    string    `json:"status" gorm:"not null;size:20;default:'pending'"`
+	CreatedAt time.Time `json:"created_at"`
 }

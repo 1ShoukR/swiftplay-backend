@@ -5,10 +5,10 @@ import (
 )
 
 type Message struct {
-	MessageID int        `json:"message_id" db:"message_id"`
-	MatchID   int        `json:"match_id" db:"match_id"`
-	SenderID  int        `json:"sender_id" db:"sender_id"`
-	Content   string     `json:"content" db:"content"`
-	CreatedAt time.Time  `json:"created_at" db:"created_at"`
-	ReadAt    *time.Time `json:"read_at,omitempty" db:"read_at"`
+	MessageID uint       `json:"message_id" gorm:"primaryKey;autoIncrement;column:message_id"`
+	MatchID   uint       `json:"match_id" gorm:"not null;index;column:match_id"`
+	SenderID  uint       `json:"sender_id" gorm:"not null;index;column:sender_id"`
+	Content   string     `json:"content" gorm:"not null;type:text"`
+	CreatedAt time.Time  `json:"created_at"`
+	ReadAt    *time.Time `json:"read_at,omitempty" gorm:"column:read_at"`
 }

@@ -18,8 +18,8 @@ func main() {
 
 	// Graceful shutdown
 	go func() {
-		fmt.Printf("Server starting on %s\n", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil {
+		fmt.Println("Server starting on :8081")
+		if err := srv.Run(":8081"); err != nil {
 			log.Fatal("Server failed to start:", err)
 		}
 	}()

@@ -2,16 +2,16 @@ package server
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
 	"github.com/1shoukr/swiftplay-backend/internal/server/routes"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 type Server struct {
-	*http.Server
-	DB *database.Database
+	engine *gin.Engine
+	DB     *database.Database
 }
 
 func NewServer() (*Server, error) {
@@ -19,23 +19,30 @@ func NewServer() (*Server, error) {
 		log.Println("Warning: .env file not found, using environment variables")
 	}
 
+	// Set Gin mode to release in production
+	gin.SetMode(gin.DebugMode)
+
 	dbConfig := database.LoadConfig()
 	db, err := database.NewDatabase(dbConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	router := routes.NewRouter(db)
+	engine := gin.Default()
+
+	// Setup routes
+	routes.SetupRoutes(engine, db)
 
 	server := &Server{
-		Server: &http.Server{
-			Addr:    ":8080",
-			Handler: router,
-		},
-		DB: db,
+		engine: engine,
+		DB:     db,
 	}
 
 	return server, nil
+}
+
+func (s *Server) Run(addr string) error {
+	return s.engine.Run(addr)
 }
 
 func (s *Server) Close() error {
