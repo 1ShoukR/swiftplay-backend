@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/1shoukr/swiftplay-backend/internal/server"
@@ -16,10 +17,12 @@ func main() {
 		log.Fatal("Failed to create server:", err)
 	}
 
+	port := ":" + strconv.Itoa(srv.Config.Port)
+
 	// Graceful shutdown
 	go func() {
-		fmt.Println("Server starting on :8081")
-		if err := srv.Run(":8081"); err != nil {
+		fmt.Printf("Server starting on %s\n", port)
+		if err := srv.Run(port); err != nil {
 			log.Fatal("Server failed to start:", err)
 		}
 	}()

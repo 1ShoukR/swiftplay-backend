@@ -4,10 +4,11 @@ import (
 	"net/http"
 
 	"github.com/1shoukr/swiftplay-backend/internal/database"
+	"github.com/1shoukr/swiftplay-backend/internal/jwt"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, db *database.Database) {
+func SetupRoutes(r *gin.Engine, db *database.Database, jwtService *jwt.JWTService) {
 	// Logger middleware (Gin has built-in logger)
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
@@ -21,9 +22,9 @@ func SetupRoutes(r *gin.Engine, db *database.Database) {
 	api := r.Group("/api")
 	{
 		// Mount auth routes under /api/auth
-		SetupAuthRoutes(api, db)
-		
+		SetupAuthRoutes(api, db, jwtService)
+
 		// Mount user routes under /api/users
-		SetupUserRoutes(api, db)
+		SetupUserRoutes(api, db, jwtService)
 	}
 }
